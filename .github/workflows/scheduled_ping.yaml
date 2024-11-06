@@ -1,0 +1,20 @@
+name: Scheduled Ping
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+  
+jobs:
+  ping:
+    name: Ping Server
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Ping Server
+        id: ping-server
+        env:
+            URL_PING: ${{ secrets.URL_PING }}
+        run: |
+          curl -X GET --max-time 5 --fail-with-body -o /dev/null  -s -w 'response_code: %{response_code}\ntime_total: %{time_total}s\n' "$URL_PING"

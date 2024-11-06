@@ -1,0 +1,17 @@
+FROM node:22-slim
+
+LABEL maintainer = "Eden Cadagiani <e.cadagiani@gmail.com>"
+
+ENV PORT 3000
+ENV NODE_ENV development
+
+ENV NODE_APP_PATH /home/node/app
+WORKDIR /home/node/app
+ADD ./api/package.json package.json
+RUN npm install
+
+COPY ./api /home/node/app
+
+EXPOSE $PORT
+
+CMD npm run start

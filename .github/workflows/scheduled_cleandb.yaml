@@ -1,0 +1,22 @@
+name: Scheduled Clean DB
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+  
+jobs:
+  clean_db:
+    name: Clean DB
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Clean DB
+        id: clean_db
+        env:
+            URL_CLEAN_DB: ${{ secrets.URL_CLEAN_DB }}
+            ADMIN_USER: ${{ secrets.ADMIN_USER }}
+            ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        run: |
+          curl -X POST --fail-with-body -s -w '\n\nresponse_code: %{response_code}\ntime_total: %{time_total}s\n' -u "$ADMIN_USER:$ADMIN_PASSWORD" "$URL_CLEAN_DB"

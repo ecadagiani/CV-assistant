@@ -1,0 +1,113 @@
+name: Deploy docker image
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: eu-west-3
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx (for arm64 build)
+        run: |
+          docker buildx create --use
+          
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+          API_URL: ${{ vars.API_URL }}
+          ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+        run: |
+          # Build a docker container and push it to ECR so that it can be deployed to ECS.
+          # Build with Buildx for arm64 and amd64
+          docker buildx build \
+            --file ./Dockerfile.prod \
+            --platform linux/arm64,linux/amd64 \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            --build-arg VITE_API_URL=${API_URL} \
+            --push .
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
+
+          # docker build -f ./Dockerfile.prod -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          # echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT          
+          # docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+    needs: build
+
+    steps:
+    - name: Get Github action IP
+      id: ip
+      uses: haythem/public-ip@v1.3
+
+    - name: Add Github Actions IP to Security group
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ env.AWS_REGION }}
+        AWS_SG_NAME: ${{ vars.AWS_SG_NAME }}
+      run: |
+        aws ec2 authorize-security-group-ingress --group-name $AWS_SG_NAME --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32    
+        
+    - name: Deploy to prod server
+      uses: appleboy/ssh-action@master
+      env:
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        AWS_REGION: ${{ env.AWS_REGION }}
+      with:
+        host: ${{ secrets.SSH_HOSTNAME }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        envs: AWS_ACCOUNT_ID,AWS_REGION
+        script: |
+          # In the remote server
+          cd /home/ec2-user/resume-assistant &&
+          git checkout main &&
+          git fetch --all &&
+          git reset --hard origin/main &&
+          git pull origin main &&
+          git submodule update --recursive &&
+          git submodule foreach --recursive 'git checkout main && git fetch origin && git reset --hard origin/main' &&
+          aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com &&
+          docker-compose -f docker-compose.prod.yml pull api &&
+          docker-compose -f docker-compose.prod.yml up -d --no-deps --force-recreate api &&
+          docker system prune -f
+              
+    - name: Remove Github Actions IP from security group
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ env.AWS_REGION }}
+        AWS_SG_NAME: ${{ vars.AWS_SG_NAME }}
+      if: always()
+      run: |
+        aws ec2 revoke-security-group-ingress --group-name $AWS_SG_NAME --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32

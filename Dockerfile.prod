@@ -1,0 +1,44 @@
+FROM --platform=linux/arm64/v8 node:20-bullseye-slim as build_client
+
+LABEL maintainer = "Eden Cadagiani <e.cadagiani@gmail.com>"
+
+ARG VITE_API_URL
+ENV VITE_API_URL $VITE_API_URL
+ENV ENVIRONMENT PRODUCTION
+# not NODE_ENV=production because vite is install in devDependencies, and build is already a production mode
+
+WORKDIR /client
+COPY ./client/package.json ./package.json
+RUN npm install
+COPY ./client .
+RUN npm run build
+
+
+FROM --platform=linux/arm64/v8 node:20-bullseye-slim as production
+LABEL maintainer = "Eden Cadagiani <e.cadagiani@gmail.com>"
+
+ENV PORT 3000
+ENV NODE_ENV production
+ENV ENVIRONMENT PRODUCTION
+
+RUN apt-get update && apt-get install -y --no-install-recommends dumb-init
+
+ENV NODE_APP_PATH /home/node/app
+WORKDIR /home/node/app
+COPY --chown=node:node ./api/package*.json ./
+
+RUN npm ci --omit=dev
+
+COPY --chown=node:node ./api /home/node/app
+COPY --chown=node:node --from=build_client /client/dist /home/node/app/client-build
+
+RUN npm run email:build
+RUN npm run admin:build
+
+USER node
+
+EXPOSE $PORT
+
+ENV ADMIN_JS_SKIP_BUNDLE="true"
+
+CMD ["dumb-init", "node", "index.js"]

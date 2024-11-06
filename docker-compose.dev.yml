@@ -1,0 +1,43 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${NODE_PORT}:3000"
+    command: "npm run dev"
+    depends_on:
+      - mongo
+    env_file:
+      - .env
+    volumes:
+      - ./api:/home/node/app
+      - /home/node/app/node_modules
+
+  mongo:
+    image: mongo:7
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/data/db
+      - .docker/mongo/01_init.js:/docker-entrypoint-initdb.d/01_init.js:ro
+
+  redis:
+    image: redis/redis-stack:7.4.0-v0
+    restart: always
+    ports:
+      - 8001:8001
+    environment:
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_ARGS: --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+
+volumes:
+  db_data:
+  redis_data:

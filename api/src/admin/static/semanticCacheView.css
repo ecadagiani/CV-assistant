@@ -1,0 +1,33 @@
+:root {}
+
+section[data-css="SemanticCache-show-drawer-content"] {
+  h4 {
+    font-size: 1.5em;
+    margin: 0;
+  }
+
+  .semantic_cache-nearest {
+    list-style-type: none;
+    padding: 2rem 0;
+    display: flex;
+    flex-direction: column;
+
+    .semantic_cache-nearest-item {
+      display: flex;
+      gap: 1em;
+      border-bottom: 1px solid #ccc;
+      padding: 1em 0;
+      align-items: center;
+
+      .semantic_cache-nearest-item-index {
+        font-size: 1.1em;
+        margin-right: 1em;
+        align-self: flex-start;
+      }
+
+      a {
+        margin-right: 1em;
+      }
+    }
+  }
+}

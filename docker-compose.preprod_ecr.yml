@@ -1,0 +1,42 @@
+services:
+  api:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.eu-west-3.amazonaws.com/resume-assistant:latest
+    restart: always
+    ports:
+      - "${NODE_PORT}:3000"
+    environment:
+      - ENVIRONMENT=PRODUCTION
+    env_file:
+      - .env
+    volumes:
+      - ./api/credentials:/home/node/app/credentials
+      - ./api/resources/documents:/home/node/app/resources/documents
+      - ./api/resources/images:/home/node/app/resources/images
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:7
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/data/db
+      - .docker/mongo/01_init.js:/docker-entrypoint-initdb.d/01_init.js:ro
+
+  redis:
+    image: redis/redis-stack-server:7.4.0-v0
+    restart: always
+    environment:
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_ARGS: --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+
+volumes:
+  db_data:
+  redis_data:

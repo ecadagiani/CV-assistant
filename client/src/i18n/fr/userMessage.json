@@ -1,0 +1,5 @@
+{
+  "cancel_simple_contact": "*Annule l'envoi du mail*",
+  "send_simple_contact": "*Envoi d'un mail*\n> **Mail**:\n> {{email}}\n> **Nom**:\n> {{name}}\n> **Message**:\n> {{body, blockquote}}",
+  "console_welcome_message": "Bonjour petit curieux ! Que viens tu fouiner içi ? Si tu as des questions, n'hésite pas à me les poser dans le chat!"
+}

@@ -1,0 +1,13 @@
+:root {}
+
+section[data-css="Message-show-drawer-content"] {
+  h4 {
+    font-size: 1.5em;
+    margin: 0;
+  }
+}
+
+.json-section>div {
+  border-radius: 10px;
+  padding: 1em;
+}

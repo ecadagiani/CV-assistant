@@ -1,0 +1,33 @@
+:root {}
+
+section[data-css="User-show-drawer-content"] {
+  h4 {
+    font-size: 1.5em;
+    margin: 0;
+  }
+
+  .conversations-list {
+    list-style-type: none;
+    padding: 2rem 0;
+    display: flex;
+    flex-direction: column;
+
+    .conversations-item {
+      display: flex;
+      gap: 1.5em;
+      border-bottom: 1px solid #ccc;
+      padding: 1em 0;
+      align-items: center;
+
+      .conversations-item-index {
+        font-size: 1.1em;
+        margin-right: 1em;
+        align-self: flex-start;
+      }
+
+      a {
+        margin-right: 1em;
+      }
+    }
+  }
+}

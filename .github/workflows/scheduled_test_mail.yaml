@@ -1,0 +1,22 @@
+name: Scheduled Test Mail
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+  
+jobs:
+  test_mail:
+    name: Test Mail
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Test Mail
+        id: test_mail
+        env:
+            URL_TEST_MAIL: ${{ secrets.URL_TEST_MAIL }}
+            ADMIN_USER: ${{ secrets.ADMIN_USER }}
+            ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        run: |
+          curl -X GET --max-time 5 --fail-with-body -o /dev/null  -s -w 'response_code: %{response_code}\ntime_total: %{time_total}s\n' -u "$ADMIN_USER:$ADMIN_PASSWORD" "$URL_TEST_MAIL"

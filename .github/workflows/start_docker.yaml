@@ -1,0 +1,49 @@
+name: Start Docker
+
+on:
+  workflow_dispatch:
+  
+env:
+  AWS_REGION: eu-west-3
+
+jobs:
+  restart_nginx:
+    name: Start docker
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Get Github action IP
+        id: ip
+        uses: haythem/public-ip@v1.3
+
+      - name: Add Github Actions IP to Security group
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_SG_NAME: ${{ vars.AWS_SG_NAME }}
+        run: |
+          aws ec2 authorize-security-group-ingress --group-name $AWS_SG_NAME --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32    
+          
+      - name: Start Docker
+        id: start-docker
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOSTNAME }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # In the remote server
+            cd /home/ec2-user/resume-assistant &&
+            docker-compose -f docker-compose.prod.yml up -d
+
+      - name: Remove Github Actions IP from security group
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_SG_NAME: ${{ vars.AWS_SG_NAME }}
+        if: always()
+        run: |
+          aws ec2 revoke-security-group-ingress --group-name $AWS_SG_NAME --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
