@@ -34,7 +34,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # In the remote server
-              cd /home/ec2-user/resume-assistant &&
+              cd /home/ec2-user/cv-assistant &&
               docker-compose -f docker-compose.prod.yml stop nginx &&
               sudo certbot certonly --force-renew --standalone -d ecadagiani.fr --non-interactive --agree-tos -m e.cadagiani@gmail.com
               docker-compose -f docker-compose.prod.yml pull nginx &&

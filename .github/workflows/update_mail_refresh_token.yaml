@@ -39,7 +39,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # In the remote server
-            cd /home/ec2-user/resume-assistant &&
+            cd /home/ec2-user/cv-assistant &&
             export TMP_EMAIL_REFRESH_TOKEN="${{ github.event.inputs.refresh_token }}"
             sed -i 's@EMAIL_REFRESH_TOKEN=.*@EMAIL_REFRESH_TOKEN='"$TMP_EMAIL_REFRESH_TOKEN"'@' '.env'
             docker-compose -f docker-compose.prod.yml up -d --no-deps --force-recreate api
