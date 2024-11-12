@@ -90,7 +90,7 @@ jobs:
         envs: AWS_ACCOUNT_ID,AWS_REGION
         script: |
           # In the remote server
-          cd /home/ec2-user/cv-assistant &&
+          cd /home/ec2-user/CV-assistant &&
           git checkout main &&
           git fetch --all &&
           git reset --hard origin/main &&

@@ -35,7 +35,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # In the remote server
-            cd /home/ec2-user/cv-assistant &&
+            cd /home/ec2-user/CV-assistant &&
             docker-compose -f docker-compose.prod.yml up -d
 
       - name: Remove Github Actions IP from security group
