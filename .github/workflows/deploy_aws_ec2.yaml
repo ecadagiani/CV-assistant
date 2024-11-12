@@ -20,6 +20,10 @@ jobs:
 
       - name: Git Submodule Update
         run: |
+          mkdir -p $HOME/.ssh
+          echo '${{ secrets.SUBMODULE_REPO_DEPLOY_KEY }}' > $HOME/.ssh/ssh.key
+          chmod 600 $HOME/.ssh/ssh.key
+          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/ssh.key"
           git pull --recurse-submodules
           git submodule update --init --recursive
 
