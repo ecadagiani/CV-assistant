@@ -1,0 +1,32 @@
+{
+  "name": "resume-assistant-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo for Eden Cadagiani's resume assistant.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ecadagiani/resume-assistant"
+  },
+  "homepage": "https://ecadagiani.fr?o=package",
+  "bugs": {
+    "url": "https://github.com/ecadagiani/resume-assistant/issues"
+  },
+  "author": "Eden Cadagiani <e.cadagiani@gmail.com>",
+  "license": "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)",
+  "scripts": {
+    "pull_submodules": "git submodule update --init --recursive",
+    "dev_api_start": "docker compose -f docker-compose.dev.yml up -d",
+    "dev_client_start": "npm --prefix client run dev",
+    "dev_api_logs": "docker compose -f docker-compose.dev.yml logs api -f",
+    "dev_api_stop": "docker compose -f docker-compose.dev.yml stop",
+    "dev_api_remove": "docker compose -f docker-compose.dev.yml down -v",
+    "dev_api_restart": "docker compose -f docker-compose.dev.yml down && docker compose -f docker-compose.dev.yml up -d && docker compose -f docker-compose.dev.yml logs api -f",
+    "dev_api_reset": "docker compose -f docker-compose.dev.yml down -v && docker compose -f docker-compose.dev.yml up -d && docker compose -f docker-compose.dev.yml logs api -f",
+    "dev_api_reset_volumes": "docker compose -f docker-compose.dev.yml down && docker volume rm $(docker volume ls -q | grep db_data) && docker compose -f docker-compose.dev.yml up -d && docker compose -f docker-compose.dev.yml logs api -f",
+    "dev_api_build": "docker compose -f docker-compose.dev.yml build",
+    "dev_populate_db": "docker compose -f docker-compose.dev.yml exec api npm run script:populate-db",
+    "preprod_start": "docker compose -f docker-compose.preprod.yml down && docker compose -f docker-compose.preprod.yml build && docker compose -f docker-compose.preprod.yml up -d && docker compose -f docker-compose.preprod.yml logs api -f",
+    "preprod_down": "docker compose -f docker-compose.preprod.yml down",
+    "preprod_ecr_start": "docker compose -f docker-compose.preprod_ecr.yml down && docker compose -f docker-compose.preprod_ecr.yml pull api && docker compose -f docker-compose.preprod_ecr.yml up -d --no-deps --force-recreate && docker compose -f docker-compose.preprod_ecr.yml logs api -f"
+  }
+}
