@@ -150,14 +150,14 @@ export async function getLlmLimiterForConversation(conversation) {
 }
 
 export async function getModelFromLimiter(llmLimiter) {
-  const OPENAI_SLIM_MODEL = await getSetting('OPENAI_SLIM_MODEL');
-  const OPENAI_LARGE_MODEL = await getSetting('OPENAI_LARGE_MODEL');
+  const LLM_SLIM_MODEL = await getSetting('LLM_SLIM_MODEL');
+  const LLM_LARGE_MODEL = await getSetting('LLM_LARGE_MODEL');
   const modelSize = llmLimiter.whichModelToUse();
   switch (modelSize) {
     case MODEL_SIZE.LARGE:
-      return { modelSize, model: OPENAI_LARGE_MODEL };
+      return { modelSize, model: LLM_LARGE_MODEL };
     case MODEL_SIZE.SLIM:
-      return { modelSize, model: OPENAI_SLIM_MODEL };
+      return { modelSize, model: LLM_SLIM_MODEL };
     default:
       return { modelSize: null, model: null };
   }

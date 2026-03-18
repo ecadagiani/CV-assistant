@@ -15,6 +15,7 @@
   "license": "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)",
   "scripts": {
     "pull_submodules": "git submodule update --init --recursive",
+    "dev_install": "npm --prefix client install && npm --prefix api install",
     "dev_api_start": "docker compose -f docker-compose.dev.yml up -d",
     "dev_client_start": "npm --prefix client run dev",
     "dev_api_logs": "docker compose -f docker-compose.dev.yml logs api -f",

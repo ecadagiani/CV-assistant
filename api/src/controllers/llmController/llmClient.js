@@ -1,12 +1,12 @@
 import _ from 'lodash';
-import OpenAI from 'openai';
-import { OPENAI_API_KEY } from '../../config.js';
+import { OpenRouter } from '@openrouter/sdk';
+import { OPENROUTER_API_KEY } from '../../config.js';
 import { getSetting } from '../settingController.js';
 import { getTokensLength } from './token.js';
 // https://redis.io/learn/howtos/solutions/vector/getting-started-vector
 
-export const openAiClient = new OpenAI({
-  apiKey: OPENAI_API_KEY,
+export const llmClient = new OpenRouter({
+  apiKey: OPENROUTER_API_KEY,
 });
 
 /**
@@ -38,17 +38,17 @@ export async function createPrompt(knowledgesMatch, userQuestion, promptTemplate
 }
 
 /**
- * Fetches a response from the OpenAI language model based on the provided prompt and user settings.
+ * Fetches a response from the LLM based on the provided prompt and user settings.
  *
- * @param {string} prompt - The prompt to send to the OpenAI model.
+ * @param {string} prompt - The prompt to send to the LLM.
  * @param {string} userId - The ID of the user making the request.
- * @param {Object} options - Optional settings for the OpenAI model.
+ * @param {Object} options - Optional settings for the LLM.
  * @param {string} [options.model] - The model to use for generating the response.
  * @param {number} [options.frequencyPenalty=0] - Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.
  * @param {number} [options.presencePenalty=0] - Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.
  * @param {number} [options.temperature=1] - What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
- * @returns {Promise<Stream<OpenAI.Chat.Completions.ChatCompletionChunk> | OpenAI.Chat.Completions.ChatCompletion>} The response from the OpenAI model.
- * @throws Will throw an error if the OpenAI API request fails.
+ * @returns {Promise<Object>} The response from the LLM (chat completion or stream).
+ * @throws Will throw an error if the API request fails.
  */
 export async function fetchLlmResponse(prompt, userQuestion, userId, previousMessages = [], {
   model,
@@ -57,38 +57,40 @@ export async function fetchLlmResponse(prompt, userQuestion, userId, previousMes
   temperature = 1,
   stream = false,
 } = {}) {
-  return openAiClient.chat.completions.create({
-    model,
-    frequency_penalty: frequencyPenalty,
-    presence_penalty: presencePenalty,
-    temperature,
-    user: userId,
-    stream,
-    messages: [
-      { role: 'system', content: prompt },
-      ...(
-        _.flatMap(previousMessages, ({ user, assistant }) => [
-          { role: 'user', content: user },
-          { role: 'assistant', content: assistant },
-        ])
-      ),
-      { role: 'user', content: userQuestion },
-    ],
+  return llmClient.chat.send({
+    chatGenerationParams: {
+      model,
+      frequencyPenalty,
+      presencePenalty,
+      temperature,
+      user: userId?.toString(),
+      stream,
+      messages: [
+        { role: 'system', content: prompt },
+        ...(
+          _.flatMap(previousMessages, ({ user, assistant }) => [
+            { role: 'user', content: user },
+            { role: 'assistant', content: assistant },
+          ])
+        ),
+        { role: 'user', content: userQuestion },
+      ],
+    },
   });
 }
 
 /**
- * Fetches a response from the OpenAI language model based on the provided prompt and user settings.
+ * Fetches a response from the LLM based on the provided prompt and user settings.
  *
- * @param {string} prompt - The prompt to send to the OpenAI model.
+ * @param {string} prompt - The prompt to send to the LLM.
  * @param {string} userId - The ID of the user making the request.
- * @param {Object} options - Optional settings for the OpenAI model.
+ * @param {Object} options - Optional settings for the LLM.
  * @param {string} [options.model] - The model to use for generating the response.
  * @param {number} [options.frequencyPenalty=0] - Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.
  * @param {number} [options.presencePenalty=0] - Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.
  * @param {number} [options.temperature=1] - What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
- * @returns {Promise<{response: string, totalTokens: number}>} The response from the OpenAI model.
- * @throws Will throw an error if the OpenAI API request fails.
+ * @returns {Promise<{response: string, totalTokens: number}>} The response from the LLM.
+ * @throws Will throw an error if the API request fails.
  */
 export async function getLlmResponse(prompt, userQuestion, userId, previousMessages = [], options = {}) {
   const response = await fetchLlmResponse(prompt, userQuestion, userId, previousMessages, options);
@@ -97,27 +99,26 @@ export async function getLlmResponse(prompt, userQuestion, userId, previousMessa
     return {};
   }
 
-  // Return the OpenAI response (assuming first choice is the desired output)
   return {
     response: response.choices[0].message.content,
-    totalTokens: response.usage?.total_tokens,
+    totalTokens: response.usage?.totalTokens,
   };
 }
 
 /**
- * Streams a response from the OpenAI language model based on the provided prompt and user settings.
+ * Streams a response from the LLM based on the provided prompt and user settings.
  *
- * @param {string} prompt - The prompt to send to the OpenAI model.
+ * @param {string} prompt - The prompt to send to the LLM.
  * @param {string} userQuestion - The question asked by the user.
  * @param {string} userId - The ID of the user making the request.
- * @param {Object} options - Optional settings for the OpenAI model.
+ * @param {Object} options - Optional settings for the LLM.
  * @param {string} [options.model] - The model to use for generating the response.
  * @param {number} [options.frequencyPenalty=0] - Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.
  * @param {number} [options.presencePenalty=0] - Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.
  * @param {number} [options.temperature=1] - What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
  * @yields {Object} An object containing the current content, full response, and a boolean indicating if the stream is done.
  * @returns {Promise<{response: string, totalTokens: number}>} A promise that resolves when the streaming is complete.
- * @throws Will throw an error if the OpenAI API request fails.
+ * @throws Will throw an error if the API request fails.
  */
 export async function* streamLlmResponse(
   prompt,
@@ -140,14 +141,14 @@ export async function* streamLlmResponse(
     yield {
       response,
       isDone: false,
-      isStreamDone: !!chunk.choices[0]?.finish_reason,
+      isStreamDone: !!chunk.choices[0]?.finishReason,
       content,
     };
   }
 
   const systemPromptToken = await getTokensLength(prompt, options.model);
   const questionToken = await getTokensLength(userQuestion, options.model);
-  const promptToken = systemPromptToken + questionToken + 11; // 11 because of the openAI system to pass system prompt and question
+  const promptToken = systemPromptToken + questionToken + 11;
   const responseToken = await getTokensLength(response, options.model);
 
   yield {

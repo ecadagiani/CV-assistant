@@ -36,8 +36,7 @@ This project is licensed under the [Attribution-NonCommercial 4.0 International 
 - **Infrastructure**: Docker, Google Cloud Platform, AWS
 - **AI Layer**:
   - Dialogflow for NLU
-  - OpenAI GPT4 for complex queries
-  - Fine-tuned GPT4-mini for cost optimization
+  - LLM via OpenRouter for complex queries
   - RAG system for accurate responses
   - Semantic cache for response optimization
 
@@ -48,7 +47,7 @@ This project is licensed under the [Attribution-NonCommercial 4.0 International 
 - Node.js >= 22
 - Docker & Docker Compose
 - Dialogflow project
-- OpenAI API key
+- OpenRouter API key
 
 ### Local Development
 
@@ -62,8 +61,7 @@ This project is licensed under the [Attribution-NonCommercial 4.0 International 
 2. Install dependencies
 
    ```bash
-   npm --prefix client install
-   npm --prefix api install
+   npm run dev_install
    ```
 
 3. Create your `.env` file from the template
@@ -73,7 +71,7 @@ This project is licensed under the [Attribution-NonCommercial 4.0 International 
    ```
 
    Then edit `.env` and fill in your credentials:
-   - `OPENAI_API_KEY` — your OpenAI API key
+   - `OPENROUTER_API_KEY` — your OpenRouter API key
    - `DIALOGFLOW_PROJECT_ID` / `DIALOGFLOW_ENVIRONMENT_ID` — your Dialogflow project settings
    - `GOOGLE_APPLICATION_CREDENTIALS` — path to your GCloud service account JSON key (mounted inside the container at `/home/node/app/credentials/`)
    - `EMAIL_APP_USER` / `EMAIL_APP_PASSWORD` — for the contact form mailer

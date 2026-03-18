@@ -53,7 +53,7 @@ export const SEMANTIC_CACHE_INDEX_KEY = 'idx:semanticCache';
 const createRedisIndex = async () => {
   // https://redis.io/learn/howtos/solutions/vector/getting-started-vector
   const nodeRedisClient = await getRedisClient();
-  const OPENAI_EMBEDDING_SIZE = await getSetting('OPENAI_EMBEDDING_SIZE');
+  const LLM_EMBEDDING_SIZE = await getSetting('LLM_EMBEDDING_SIZE');
 
   const knowledgeSchema = {
     '$.knowledgeId': {
@@ -78,7 +78,7 @@ const createRedisIndex = async () => {
       type: SchemaFieldTypes.VECTOR,
       TYPE: 'FLOAT32',
       ALGORITHM: VectorAlgorithms.FLAT,
-      DIM: OPENAI_EMBEDDING_SIZE,
+      DIM: LLM_EMBEDDING_SIZE,
       DISTANCE_METRIC: 'L2',
       INITIAL_CAP: 111,
       BLOCK_SIZE: 111,
@@ -102,7 +102,7 @@ const createRedisIndex = async () => {
       type: SchemaFieldTypes.VECTOR,
       TYPE: 'FLOAT32',
       ALGORITHM: VectorAlgorithms.FLAT,
-      DIM: OPENAI_EMBEDDING_SIZE,
+      DIM: LLM_EMBEDDING_SIZE,
       DISTANCE_METRIC: 'L2',
       INITIAL_CAP: 111,
       BLOCK_SIZE: 111,

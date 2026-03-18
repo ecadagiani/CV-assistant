@@ -5,7 +5,7 @@ import cachegoose from 'recachegoose';
 
 import {
   DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USERNAME,
-  OPENAI_DEFAULT_LARGE_MODEL, OPENAI_DEFAULT_SLIM_MODEL,
+  LLM_DEFAULT_LARGE_MODEL, LLM_DEFAULT_SLIM_MODEL,
 } from './config.js';
 import { populateKnowledgeBase } from './controllers/llmController/knowledge.js';
 import { saveNewSetting } from './controllers/settingController.js';
@@ -43,10 +43,10 @@ async function initMongo() {
     { key: 'DETECT_LANGUAGE_TIMEOUT', value: 1000, description: 'Timeout for language detection (Google Translate) in milliseconds' },
     { key: 'DETECT_LANGUAGE_MAX_CHAR', value: 40, description: 'Maximum number of characters to use for language detection in google translate' },
     { key: 'ORIGIN_QUERY_MAX_LENGTH', value: 256, description: 'Maximum length of origin query params' },
-    { key: 'OPENAI_EMBEDDING_MODEL', value: 'text-embedding-3-large', description: 'OpenAI embedding model to use' },
-    { key: 'OPENAI_EMBEDDING_SIZE', value: 3072, description: 'Size of OpenAI embeddings' },
-    { key: 'OPENAI_SLIM_MODEL', value: OPENAI_DEFAULT_SLIM_MODEL, description: 'OpenAI slim model to use' },
-    { key: 'OPENAI_LARGE_MODEL', value: OPENAI_DEFAULT_LARGE_MODEL, description: 'OpenAI large model to use' },
+    { key: 'LLM_EMBEDDING_MODEL', value: 'qwen/qwen3-embedding-8b', description: 'LLM embedding model to use' },
+    { key: 'LLM_EMBEDDING_SIZE', value: 4096, description: 'Size of LLM embeddings' },
+    { key: 'LLM_SLIM_MODEL', value: LLM_DEFAULT_SLIM_MODEL, description: 'LLM slim model to use' },
+    { key: 'LLM_LARGE_MODEL', value: LLM_DEFAULT_LARGE_MODEL, description: 'LLM large model to use' },
     { key: 'EMBEDDING_MODEL_TOKENIZER', value: 'cl100k_base.json', description: 'Tokenizer for embedding model - https://stackoverflow.com/questions/75804599/openai-api-how-do-i-count-tokens-before-i-send-an-api-request' },
     { key: 'LARGE_MODEL_TOKENIZER', value: 'o200k_base.json', description: 'Tokenizer for large model  - https://stackoverflow.com/questions/75804599/openai-api-how-do-i-count-tokens-before-i-send-an-api-request' },
     { key: 'SLIM_MODEL_TOKENIZER', value: 'o200k_base.json', description: 'Tokenizer for slim model - https://stackoverflow.com/questions/75804599/openai-api-how-do-i-count-tokens-before-i-send-an-api-request' },

@@ -59,8 +59,8 @@ routerLLM.post('/populate_knowledges', basicAuth({
 routerLLM.get('/response', basicAuth({
   users: { [ADMIN_USER]: ADMIN_PASSWORD },
 }), async (req, res) => {
-  const { OPENAI_SLIM_MODEL, LLM_KNOWLEDGE_COUNT, LLM_PROMPT } = await getSettings(
-    'OPENAI_SLIM_MODEL',
+  const { LLM_SLIM_MODEL, LLM_KNOWLEDGE_COUNT, LLM_PROMPT } = await getSettings(
+    'LLM_SLIM_MODEL',
     'LLM_KNOWLEDGE_COUNT',
     'LLM_PROMPT',
   );
@@ -70,7 +70,7 @@ routerLLM.get('/response', basicAuth({
     const question = req.query?.question;
     const knowledgeCount = Number(req.query?.knowledgeCount || LLM_KNOWLEDGE_COUNT);
     const promptTemplate = req.query?.prompt || LLM_PROMPT;
-    const model = req.query?.model || OPENAI_SLIM_MODEL;
+    const model = req.query?.model || LLM_SLIM_MODEL;
 
     if (!question) {
       res.status(400).send({

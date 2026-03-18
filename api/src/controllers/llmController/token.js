@@ -41,20 +41,20 @@ async function getEmbeddingModelEncoder() {
 }
 
 export async function getTokensLength(text, model) {
-  const { OPENAI_EMBEDDING_MODEL, OPENAI_SLIM_MODEL, OPENAI_LARGE_MODEL } = await getSettings(
-    'OPENAI_EMBEDDING_MODEL',
-    'OPENAI_SLIM_MODEL',
-    'OPENAI_LARGE_MODEL',
+  const { LLM_EMBEDDING_MODEL, LLM_SLIM_MODEL, LLM_LARGE_MODEL } = await getSettings(
+    'LLM_EMBEDDING_MODEL',
+    'LLM_SLIM_MODEL',
+    'LLM_LARGE_MODEL',
   );
   let encoder;
   switch (model) {
-    case OPENAI_SLIM_MODEL:
+    case LLM_SLIM_MODEL:
       encoder = await getSlimModelEncoder();
       break;
-    case OPENAI_LARGE_MODEL:
+    case LLM_LARGE_MODEL:
       encoder = await getLargeModelEncoder();
       break;
-    case OPENAI_EMBEDDING_MODEL:
+    case LLM_EMBEDDING_MODEL:
       encoder = await getEmbeddingModelEncoder();
       break;
     default:

@@ -1,4 +1,8 @@
 {
   "svg.preview.background": "transparent",
-  "snyk.advanced.autoSelectOrganization": true
+  "snyk.advanced.autoSelectOrganization": true,
+  "cSpell.words": [
+    "knowledges",
+    "OPENROUTER"
+  ]
 }

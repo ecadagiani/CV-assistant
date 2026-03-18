@@ -33,8 +33,8 @@ export const { REDIS_HOST } = process.env;
 export const { REDIS_PORT } = process.env;
 export const { REDIS_PASSWORD } = process.env;
 
-export const { OPENAI_API_KEY } = process.env;
-export const { OPENAI_DEFAULT_SLIM_MODEL } = process.env;
-export const { OPENAI_DEFAULT_LARGE_MODEL } = process.env;
+export const { OPENROUTER_API_KEY } = process.env;
+export const { LLM_DEFAULT_SLIM_MODEL } = process.env;
+export const { LLM_DEFAULT_LARGE_MODEL } = process.env;
 
 export const { IPDATA_API_KEY } = process.env;
